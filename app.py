@@ -1,42 +1,37 @@
-from flask import Flask, request, redirect, url_for
-import requests
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-app = Flask(__name__)
-
-# Replace with your bot's Telegram API token and chat ID
+# Ваш токен бота
 TELEGRAM_BOT_TOKEN = '7679289773:AAELewdGiJT_pRAimlMhyjVTXeT_qceZIm4'
-CHAT_ID = 'your_chat_id'  # Your Telegram chat ID
 
-@app.route('/')
-def home():
-    return "Welcome to the Artist's Gallery!"
+def start(update: Update, context: CallbackContext) -> None:
+    """Обработка команды /start"""
+    # Приветственное сообщение, которое будет отправляться при команде /start
+    update.message.reply_text(f"Hello {update.message.from_user.first_name}! Welcome to the Artist's Gallery. Type your inquiry.")
 
-@app.route('/submit', methods=['POST'])
-def submit():
-    name = request.form['name']
-    phone = request.form['phone']
-    artwork = request.form['artwork']
-    
-    # Prepare the message for Telegram
-    message = f"New inquiry:\nName: {name}\nPhone: {phone}\nInterested Artwork: {artwork}"
-    
-    # Send the message to Telegram bot
-    send_message_to_telegram(message)
-    
-    # Redirect back to home page after submission
-    return redirect(url_for('home'))
+def handle_message(update: Update, context: CallbackContext) -> None:
+    """Обработка текстовых сообщений"""
+    update.message.reply_text("Thank you for reaching out! We will respond to your inquiry shortly.")
 
-def send_message_to_telegram(message):
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    params = {
-        'chat_id': CHAT_ID,
-        'text': message
-    }
-    response = requests.get(url, params=params)
-    if response.status_code != 200:
-        print("Failed to send message to Telegram")
-    else:
-        print("Message sent to Telegram successfully")
+def main():
+    """Запуск бота"""
+    # Создаём обновитель, который будет подключаться к Telegram API
+    updater = Updater(TELEGRAM_BOT_TOKEN, use_context=True)
+
+    # Получаем диспетчера для обработки сообщений
+    dispatcher = updater.dispatcher
+
+    # Добавляем обработчик для команды /start
+    dispatcher.add_handler(CommandHandler("start", start))
+
+    # Добавляем обработчик для текстовых сообщений
+    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
+
+    # Запускаем бота
+    updater.start_polling()
+
+    # Ожидаем завершения работы
+    updater.idle()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    main()
