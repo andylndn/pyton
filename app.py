@@ -1,18 +1,19 @@
-from flask import Flask, request
 import requests
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
 
-# Вставьте ваш Telegram Bot API Token сюда
-TELEGRAM_API_URL = 'https://api.telegram.org/bot7679289773:AAELewdGiJT_pRAimlMhyjVTXeT_qceZIm4/sendMessage'
-CHAT_ID = 'your_chat_id'  # Замените на ваш ID чата
+# Укажите ваш Telegram API и chat_id
+TELEGRAM_API_URL = "https://api.telegram.org/botYOUR_BOT_TOKEN/sendMessage"
+CHAT_ID = "YOUR_CHAT_ID"
 
-@app.route('/', methods=['GET'])
-def home():
-    return "Welcome to the Artist's Website!"
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/submit_form', methods=['POST'])
 def handle_form_submission():
+    # Получаем данные из формы
     name = request.form['name']
     phone = request.form['phone']
     artwork = request.form['artwork']
